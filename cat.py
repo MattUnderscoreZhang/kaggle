@@ -54,3 +54,55 @@ def classify_colors(catdf):
       catdf.loc[catdf["Color"].apply(lambda x: color in x),'has_Gray'] = 1
   colors = colors.difference(add)
   return catdf.drop(['color_0','color_1','color_2','color_3'],axis=1)
+
+
+
+def fix_age(x):
+    if pd.isnull(x):
+        return x
+    else:
+        split = x.split(" ")
+        if "week" in split[-1]:
+            return float(split[0])/52.0
+        elif "month" in split[-1]:
+            return float(split[0])/12.0
+        elif "year" in split[-1]:
+            return float(split[0])
+        
+def get_sex(x):
+
+    if x=="Unknown" or pd.isnull(x):
+        return "Unknown"
+    else:
+        return x.split(" ")[1]
+
+def get_neuter_status(x):
+    if x=="Unknown" or pd.isnull(x):
+        return "Unknown"
+    else:
+        return x.split(" ")[0]
+
+def isMixed(x):
+    if ("mix" in x.lower()) or ("/" in x) or ("mix"):
+        return "Mixed"
+    else:
+        return "Pure"
+    
+def fixCatBreed(x):
+    if "domestic" in x.lower():
+        if "short" in x.lower():
+            return "domestic shorthair"
+        elif "medium" in x.lower():
+            return "domestic mediumhair"
+        elif "long" in x.lower():
+            return "domestic longhair"
+    elif "siamese" in x.lower():
+        return "siamese"
+    else:
+        return "rare"
+    
+def massage_df(x):
+    x["age_numeric"] = x.AgeuponOutcome.apply(fix_age)
+    x['neuter_status'] = x.SexuponOutcome.apply(get_neuter_status)
+    x['sex'] = x.SexuponOutcome.apply(get_sex)
+    x['mixed'] = x.Breed.apply(isMixed)
