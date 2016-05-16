@@ -24,33 +24,33 @@ def classify_colors(catdf):
           'Black','Gray','Agouti','White','Brown','Lilac'
       ])
   for main in maingroups:
-      catdf['has_%s'%main] = False
-      catdf.loc[catdf["Color"].apply(lambda x:main in x),'has_%s'%main] = True
+      catdf['has_%s'%main] = 0
+      catdf.loc[catdf["Color"].apply(lambda x:main in x),'has_%s'%main] = 1
   colors = colors.difference(maingroups)
 
   # Groups with orange.
   add = set(["Apricot","Flame","Tiger","Buff","Pink","Yellow"])
   for color in add:
-      catdf.loc[catdf["Color"].apply(lambda x: color in x),'has_Orange'] = True
+      catdf.loc[catdf["Color"].apply(lambda x: color in x),'has_Orange'] = 1
   colors = colors.difference(add)
   # Groups with brown.
   add = set(["Chocolate","Torbie"])
   for color in add:
-      catdf.loc[catdf["Color"].apply(lambda x: color in x),'has_Brown'] = True
+      catdf.loc[catdf["Color"].apply(lambda x: color in x),'has_Brown'] = 1
   colors = colors.difference(add)
   # Groups with calico.
   add = set(["Tricolor"])
   for color in add:
-      catdf.loc[catdf["Color"].apply(lambda x: color in x),'has_Calico'] = True
+      catdf.loc[catdf["Color"].apply(lambda x: color in x),'has_Calico'] = 1
   colors = colors.difference(add)
   # Groups with tan.
   add = set(["Cream","Seal"])
   for color in add:
-      catdf.loc[catdf["Color"].apply(lambda x: color in x),'has_Tan'] = True
+      catdf.loc[catdf["Color"].apply(lambda x: color in x),'has_Tan'] = 1
   colors = colors.difference(add)
   # Groups with gray.
   add = set(["Silver","Smoke"])
   for color in add:
-      catdf.loc[catdf["Color"].apply(lambda x: color in x),'has_Gray'] = True
+      catdf.loc[catdf["Color"].apply(lambda x: color in x),'has_Gray'] = 1
   colors = colors.difference(add)
   return catdf.drop(['color_0','color_1','color_2','color_3'],axis=1)
