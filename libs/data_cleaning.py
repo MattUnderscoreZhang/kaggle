@@ -4,15 +4,15 @@ import pandas as pd
 from copy import deepcopy
 
 def percent_outcome(df,outcome_tag):
-    # series should have pandas.DataFrame interface
-    # return a pandas.Series of probabilities
+  """ series should have pandas.DataFrame interface
+    return a pandas.Series of probabilities """
     
     return df.groupby(outcome_tag).apply(lambda x:float(len(x))/len(df))
 # end def percent_outcome
 
 def age2day(age):
-    # convert age column from year,month,week to day
-    # use as: df.AgeuponOutcome.apply(age2day)
+  """convert age column from year,month,week to day
+  use as: df.AgeuponOutcome.apply(age2day)"""
 
     if type(age) != type("1 year"):
         return np.nan
