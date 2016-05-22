@@ -111,6 +111,7 @@ def isMixed(x):
         return "Pure"
     
 def fixCatBreed(x):
+    print "deprecated, please use fix_cat_breed(df) instead"
     if "domestic" in x.lower():
         if "short" in x.lower():
             return "domestic shorthair"
@@ -122,6 +123,33 @@ def fixCatBreed(x):
         return "siamese"
     else:
         return "rare"
+
+def fix_cat_breed(df_cat):
+    """ make an extra column in database df named "hair_length"
+    put in hair length categorization. Usage: 
+        df_cat = df[df.AnimalType=='Cat'].copy(deep=True)
+        dc.fix_cat_breed(df_cat)
+    """
+    df_cat["hair_length"] = ""
+
+    hair_types = ["short","medium","long"]
+
+    for hair_type in hair_types:
+        selector = (df_cat.Breed.apply(lambda x:hair_type in x.lower())) &\
+                   (df_cat.Breed.apply(lambda x:"domestic" in x.lower()))
+        df_cat.loc[selector,"hair_length"] = "domestic " + hair_type
+    # end for 
+
+    # special case siamese
+    hair_type = "siamese"
+    selector = df_cat.Breed.apply(lambda x:hair_type in x.lower())
+    df_cat.loc[selector,"hair_length"] = hair_type
+
+    # name remaining ones rare
+    df_cat.loc[df_cat.hair_length=="","hair_length"] = "rare"
+
+    # !!!! currently edit data fram inplace
+# end def fix_cat_breed
     
 def massage_df(df):
   newdf = deepcopy(df)
