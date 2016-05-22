@@ -1,5 +1,7 @@
 import numpy as np
 import re
+import pandas as pd
+from copy import deepcopy
 
 def percent_outcome(df,outcome_tag):
     # series should have pandas.DataFrame interface
@@ -120,8 +122,11 @@ def fixCatBreed(x):
     else:
         return "rare"
     
-def massage_df(x):
-    x["age_numeric"] = x.AgeuponOutcome.apply(fix_age)
-    x['neuter_status'] = x.SexuponOutcome.apply(get_neuter_status)
-    x['sex'] = x.SexuponOutcome.apply(get_sex)
-    x['mixed'] = x.Breed.apply(isMixed)
+def massage_df(df):
+  newdf = deepcopy(df)
+  newdf["age_numeric"] = df.AgeuponOutcome.apply(fix_age)
+  newdf['neuter_status'] = df.SexuponOutcome.apply(get_neuter_status)
+  newdf['sex'] = df.SexuponOutcome.apply(get_sex)
+  newdf['mixed'] = df.Breed.apply(isMixed)
+  newdf = classify_colors(newdf)
+  return newdf
