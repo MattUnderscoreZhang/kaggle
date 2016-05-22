@@ -2,6 +2,8 @@ import numpy as np
 import re
 import pandas as pd
 from copy import deepcopy
+from datetime import datetime
+
 
 def percent_outcome(df,outcome_tag):
   """ series should have pandas.DataFrame interface
@@ -124,8 +126,11 @@ def fixCatBreed(x):
 def massage_df(df):
   newdf = deepcopy(df)
   newdf["age_numeric"] = df.AgeuponOutcome.apply(fix_age)
+  newdf["age_numeric_days"] = newdf.age_numeric * 365.
   newdf['neuter_status'] = df.SexuponOutcome.apply(get_neuter_status)
   newdf['sex'] = df.SexuponOutcome.apply(get_sex)
   newdf['mixed'] = df.Breed.apply(isMixed)
+  newdf["time_stamp"] = df.DateTime.apply(lambda string_date:
+          datetime.strptime(string_date,"%Y-%m-%d %H:%M:%S") )
   newdf = classify_colors(newdf)
   return newdf
