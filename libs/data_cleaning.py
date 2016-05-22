@@ -137,7 +137,7 @@ def fix_cat_breed(df_cat):
     for hair_type in hair_types:
         selector = (df_cat.Breed.apply(lambda x:hair_type in x.lower())) &\
                    (df_cat.Breed.apply(lambda x:"domestic" in x.lower()))
-        df_cat.loc[selector,"hair_length"] = "domestic " + hair_type
+        df_cat.loc[selector,"hair_length"] = "domestic " + hair_type + "hair"
     # end for 
 
     # special case siamese
