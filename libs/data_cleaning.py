@@ -153,8 +153,10 @@ def fix_cat_breed(df_cat):
     
 def massage_df(df):
   newdf = deepcopy(df)
-  newdf["age_numeric"] = df.AgeuponOutcome.apply(fix_age)
-  newdf["age_numeric_days"] = newdf.age_numeric * 365.
+  #newdf["age_numeric"] = df.AgeuponOutcome.apply(fix_age)
+  #newdf["age_numeric_days"] = newdf.age_numeric * 365.
+  newdf["age_numeric_days"] = df.AgeuponOutcome.apply(age2day)
+  newdf["age_numeric"] = newdf.age_numeric_days / 365.
   newdf['neuter_status'] = df.SexuponOutcome.apply(get_neuter_status)
   newdf['sex'] = df.SexuponOutcome.apply(get_sex)
   newdf['mixed'] = df.Breed.apply(isMixed)
