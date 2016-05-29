@@ -132,5 +132,9 @@ def massage_df(df):
   newdf['mixed'] = df.Breed.apply(isMixed)
   newdf["time_stamp"] = df.DateTime.apply(lambda string_date:
           datetime.strptime(string_date,"%Y-%m-%d %H:%M:%S") )
+  newdf['day_of_week'] = newdf['time_stamp'].apply(lambda x:x.dayofweek)
+  newdf['day_of_month'] = newdf['time_stamp'].apply(lambda x:x.day)
+  newdf['day_of_year'] = newdf['time_stamp'].apply(lambda x:x.dayofyear)
+  newdf['month'] = newdf['time_stamp'].apply(lambda x:x.month)
   newdf = classify_colors(newdf)
   return newdf
