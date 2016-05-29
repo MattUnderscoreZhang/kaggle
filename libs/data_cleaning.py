@@ -125,28 +125,28 @@ def fixCatBreed(x):
         return "rare"
 
 def fix_cat_breed(df_cat):
-    """ make an extra column in database df named "hair_length"
+    """ make an extra column in database df named "catbreed"
     put in hair length categorization. Usage: 
         df_cat = df[df.AnimalType=='Cat'].copy(deep=True)
         dc.fix_cat_breed(df_cat)
     """
-    df_cat["hair_length"] = ""
+    df_cat["catbreed"] = ""
 
     hair_types = ["short","medium","long"]
 
     for hair_type in hair_types:
         selector = (df_cat.Breed.apply(lambda x:hair_type in x.lower())) &\
                    (df_cat.Breed.apply(lambda x:"domestic" in x.lower()))
-        df_cat.loc[selector,"hair_length"] = "domestic " + hair_type + "hair"
+        df_cat.loc[selector,"catbreed"] = "domestic " + hair_type + "hair"
     # end for 
 
     # special case siamese
     hair_type = "siamese"
     selector = df_cat.Breed.apply(lambda x:hair_type in x.lower())
-    df_cat.loc[selector,"hair_length"] = hair_type
+    df_cat.loc[selector,"catbreed"] = hair_type
 
     # name remaining ones rare
-    df_cat.loc[df_cat.hair_length=="","hair_length"] = "rare"
+    df_cat.loc[df_cat.catbreed=="","catbreed"] = "rare"
 
     # !!!! currently edit data fram inplace
 # end def fix_cat_breed
