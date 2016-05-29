@@ -111,7 +111,7 @@ def isMixed(x):
         return "Pure"
     
 def fixCatBreed(x):
-    print "deprecated, please use fix_cat_breed(df) instead"
+    print("deprecated, please use fix_cat_breed(df) instead")
     if "domestic" in x.lower():
         if "short" in x.lower():
             return "domestic shorthair"
@@ -165,6 +165,11 @@ def massage_df(df):
   newdf['day_of_week'] = newdf['time_stamp'].apply(lambda x:x.dayofweek)
   newdf['day_of_month'] = newdf['time_stamp'].apply(lambda x:x.day)
   newdf['day_of_year'] = newdf['time_stamp'].apply(lambda x:x.dayofyear)
+  newdf['season'] = 0
+  newdf.loc[newdf['day_of_year'] >= 79., 'season'] = 1
+  newdf.loc[newdf['day_of_year'] >= 171.,'season'] = 2
+  newdf.loc[newdf['day_of_year'] >= 265.,'season'] = 3
+  newdf.loc[newdf['day_of_year'] >= 355.,'season'] = 0
   newdf['month'] = newdf['time_stamp'].apply(lambda x:x.month)
   newdf = classify_colors(newdf)
   return newdf
