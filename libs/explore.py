@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import data_cleaning as dc
 
 def load_data(inputfn="data/train.csv",splitfrac=0.6):
   alldf = pd.read_csv(inputfn)
