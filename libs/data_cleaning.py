@@ -26,12 +26,57 @@ def age2day(age):
   return int(num)*num_days[unit]
 # end def age2day
 
+def get_sex(x):
+    if x=="Unknown" or pd.isnull(x):
+        return "Unknown"
+    else:
+        return x.split(" ")[1]
+
+def get_neuter_status(x):
+    if x=="Unknown" or pd.isnull(x):
+        return "Unknown"
+    else:
+        return x.split(" ")[0]
+
+def isMixed(x):
+    if ("mix" in x.lower()) or ("/" in x) or ("mix"):
+        return "Mixed"
+    else:
+        return "Pure"
+
 def sortcol(val,index):
   split = re.split(" |/",val)
   if len(split)-1 < index:
     return np.nan
   else:
     return split[index]
+
+def fix_cat_breed(df_cat):
+    """ make an extra column in database df named "catbreed"
+    put in hair length categorization. Usage: 
+        df_cat = df[df.AnimalType=='Cat'].copy(deep=True)
+        dc.fix_cat_breed(df_cat)
+    """
+    df_cat["catbreed"] = ""
+
+    hair_types = ["short","medium","long"]
+
+    for hair_type in hair_types:
+        selector = (df_cat.Breed.apply(lambda x:hair_type in x.lower())) &\
+                   (df_cat.Breed.apply(lambda x:"domestic" in x.lower()))
+        df_cat.loc[selector,"catbreed"] = "domestic " + hair_type + "hair"
+    # end for 
+
+    # special case siamese
+    hair_type = "siamese"
+    selector = df_cat.Breed.apply(lambda x:hair_type in x.lower())
+    df_cat.loc[selector,"catbreed"] = hair_type
+
+    # name remaining ones rare
+    df_cat.loc[df_cat.catbreed=="","catbreed"] = "rare"
+
+    # !!!! currently edit data fram inplace
+# end def fix_cat_breed
 
 def classify_colors(catdf):
   """ Produce extra columns classifying if each cat has certain attributes."""
@@ -80,78 +125,6 @@ def classify_colors(catdf):
   colors = colors.difference(add)
   return catdf.drop(['color_0','color_1','color_2','color_3'],axis=1)
 
-def fix_age(x):
-    if pd.isnull(x):
-        return x
-    else:
-        split = x.split(" ")
-        if "week" in split[-1]:
-            return float(split[0])/52.0
-        elif "month" in split[-1]:
-            return float(split[0])/12.0
-        elif "year" in split[-1]:
-            return float(split[0])
-        
-def get_sex(x):
-    if x=="Unknown" or pd.isnull(x):
-        return "Unknown"
-    else:
-        return x.split(" ")[1]
-
-def get_neuter_status(x):
-    if x=="Unknown" or pd.isnull(x):
-        return "Unknown"
-    else:
-        return x.split(" ")[0]
-
-def isMixed(x):
-    if ("mix" in x.lower()) or ("/" in x) or ("mix"):
-        return "Mixed"
-    else:
-        return "Pure"
-    
-def fixCatBreed(x):
-    print("deprecated, please use fix_cat_breed(df) instead")
-    if "domestic" in x.lower():
-        if "short" in x.lower():
-            return "domestic shorthair"
-        elif "medium" in x.lower():
-            return "domestic mediumhair"
-        elif "long" in x.lower():
-            return "domestic longhair"
-    elif "siamese" in x.lower():
-        return "siamese"
-    else:
-        return "rare"
-
-def fix_cat_breed(df_cat):
-    """ make an extra column in database df named "catbreed"
-    put in hair length categorization. Usage: 
-        df_cat = df[df.AnimalType=='Cat'].copy(deep=True)
-        dc.fix_cat_breed(df_cat)
-    """
-    df_cat["catbreed"] = ""
-
-    hair_types = ["short","medium","long"]
-
-    for hair_type in hair_types:
-        selector = (df_cat.Breed.apply(lambda x:hair_type in x.lower())) &\
-                   (df_cat.Breed.apply(lambda x:"domestic" in x.lower()))
-        df_cat.loc[selector,"catbreed"] = "domestic " + hair_type + "hair"
-    # end for 
-
-    # special case siamese
-    hair_type = "siamese"
-    selector = df_cat.Breed.apply(lambda x:hair_type in x.lower())
-    df_cat.loc[selector,"catbreed"] = hair_type
-
-    # name remaining ones rare
-    df_cat.loc[df_cat.catbreed=="","catbreed"] = "rare"
-
-    # !!!! currently edit data fram inplace
-# end def fix_cat_breed
-    
-
 def classify_breedsizes(dogdf):
   """ Produce extra columns classifying if each cat has certain attributes."""
   for i in range(5):
@@ -179,7 +152,7 @@ def classify_breedsizes(dogdf):
       dogdf.loc[dogdf["Breed"].apply(lambda x: breed not in x),'is_small'] = False
   sizes = sizes.difference(add)
   # Groups that are medium.
-    add = set(['Border Collie','Pit Bull', 'Australian Cattle Dog', 'Australian Kelpie','Staffordshire','Schnauzer'])
+  add = set(['Border Collie','Pit Bull', 'Australian Cattle Dog', 'Australian Kelpie','Staffordshire','Schnauzer'])
   for breed in add:
       dogdf.loc[dogdf["Breed"].apply(lambda x: breed in x),'is_medium'] = True
       dogdf.loc[dogdf["Breed"].apply(lambda x: breed not in x),'is_medium'] = False
@@ -204,11 +177,8 @@ def classify_breedsizes(dogdf):
   sizes = sizes.difference(add)
   return dogdf.drop(['size_0','size_1','size_2','size_3','size_4'],axis=1)
 
-
 def massage_df(df):
   newdf = deepcopy(df)
-  #newdf["age_numeric"] = df.AgeuponOutcome.apply(fix_age)
-  #newdf["age_numeric_days"] = newdf.age_numeric * 365.
   newdf["age_numeric_days"] = df.AgeuponOutcome.apply(age2day)
   newdf["age_numeric"] = newdf.age_numeric_days / 365.
   newdf['neuter_status'] = df.SexuponOutcome.apply(get_neuter_status)
