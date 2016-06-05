@@ -151,6 +151,54 @@ def fix_cat_breed(df_cat):
     # !!!! currently edit data fram inplace
 # end def fix_cat_breed
     
+
+def classify_breedsizes(dogdf):
+  """ Produce extra columns classifying if each cat has certain attributes."""
+  for i in range(5):
+    dogdf['size_%d'%i] = dogdf['Breed'].apply(lambda x:sortcol(x,i))
+
+  sizes = set(dogdf['size_0'].drop_duplicates())
+  sizes = sizes.union(dogdf['size_1'].drop_duplicates())
+  sizes = sizes.union(dogdf['size_2'].drop_duplicates())
+  sizes = sizes.union(dogdf['size_3'].drop_duplicates())
+  sizes = sizes.union(dogdf['size_4'].drop_duplicates())
+  sizes = sizes.difference(set([np.nan]))
+
+
+  # Groups that are toy.
+  add = set(['Chihuahua'])
+  for breed in add:
+      dogdf.loc[dogdf["Breed"].apply(lambda x: breed in x),'is_toy'] = True
+      dogdf.loc[dogdf["Breed"].apply(lambda x: breed not in x),'is_toy'] = False
+  sizes = sizes.difference(add)
+  # Groups that are small.
+  add = set(['Dachshund','Miniature Poodle','Rat Terrier','Jack Russell Terrier','Yorkshire Terrier','Miniature Schnauzer','Beagle',
+          'Cairn Terrier','Shih Tzu'])
+  for breed in add:
+      dogdf.loc[dogdf["Breed"].apply(lambda x: breed in x),'is_small'] = True
+      dogdf.loc[dogdf["Breed"].apply(lambda x: breed not in x),'is_small'] = False
+  sizes = sizes.difference(add)
+  # Groups that are medium.
+  add = set(['Australian Shepherd','Catahoula', 'Siberian Husky', 'Pointer'])
+  for breed in add:
+      dogdf.loc[dogdf["Breed"].apply(lambda x: breed in x),'is_large'] = True
+      dogdf.loc[dogdf["Breed"].apply(lambda x: breed not in x),'is_large'] = False
+  sizes = sizes.difference(add)
+  # Groups that are extra large.
+  add = set(['Labrador Retriever', 'German Shepherd', 'American Staffordshire Terrier'])
+  for breed in add:
+      dogdf.loc[dogdf["Breed"].apply(lambda x: breed in x),'is_xl'] = True
+      dogdf.loc[dogdf["Breed"].apply(lambda x: breed not in x),'is_xl'] = False
+  sizes = sizes.difference(add)
+  # Groups that are extra extra large.
+  add = set(['Rottweiler','American Bulldog', 'Great Pyrenees'])
+  for breed in add:
+      dogdf.loc[dogdf["Breed"].apply(lambda x: breed in x),'is_xxl'] = True
+      dogdf.loc[dogdf["Breed"].apply(lambda x: breed not in x),'is_xxl'] = False
+  sizes = sizes.difference(add)
+  return dogdf.drop(['size_0','size_1','size_2','size_3','size_4'],axis=1)
+
+
 def massage_df(df):
   newdf = deepcopy(df)
   #newdf["age_numeric"] = df.AgeuponOutcome.apply(fix_age)
@@ -172,67 +220,5 @@ def massage_df(df):
   newdf.loc[newdf['day_of_year'] >= 355.,'season'] = 0
   newdf['month'] = newdf['time_stamp'].apply(lambda x:x.month)
   newdf = classify_colors(newdf)
-  return newdf
-
-def classify_breedsizes(dogdf):
-  """ Produce extra columns classifying if each cat has certain attributes."""
-  for i in range(5):
-    dogdf['size_%d'%i] = dogdf['Breed'].apply(lambda x:sortcol(x,i))
-
-  sizes = set(dogdf['size_0'].drop_duplicates())
-  sizes = sizes.union(dogdf['size_1'].drop_duplicates())
-  sizes = sizes.union(dogdf['size_2'].drop_duplicates())
-  sizes = sizes.union(dogdf['size_3'].drop_duplicates())
-  sizes = sizes.union(dogdf['size_4'].drop_duplicates())
-  sizes = sizes.difference(set([np.nan]))
-
-
-  # Groups that are toy.
-  add = set(['Chihuahua'])
-  for breed in add:
-      dogdf.loc[dogdf["Breed"].apply(lambda x: breed in x),'is_toy'] = 1
-  sizes = sizes.difference(add)
-  # Groups that are small.
-  add = set(['Dachshund','Miniature Poodle','Rat Terrier','Jack Russell Terrier','Yorkshire Terrier','Miniature Schnauzer','Beagle',
-          'Cairn Terrier','Shih Tzu'])
-  for breed in add:
-      dogdf.loc[dogdf["Breed"].apply(lambda x: breed in x),'is_small'] = 1
-  sizes = sizes.difference(add)
-  # Groups that are medium.
-  add = set(['Australian Shepherd','Catahoula', 'Siberian Husky', 'Pointer'])
-  for breed in add:
-      dogdf.loc[dogdf["Breed"].apply(lambda x: breed in x),'is_large'] = 1
-  sizes = sizes.difference(add)
-  # Groups that are extra large.
-  add = set(['Labrador Retriever', 'German Shepherd', 'American Staffordshire Terrier'])
-  for breed in add:
-      dogdf.loc[dogdf["Breed"].apply(lambda x: breed in x),'is_xl'] = 1
-  sizes = sizes.difference(add)
-  # Groups that are extra extra large.
-  add = set(['Rottweiler','American Bulldog', 'Great Pyrenees'])
-  for breed in add:
-      dogdf.loc[dogdf["Breed"].apply(lambda x: breed in x),'is_xxl'] = 1
-  sizes = sizes.difference(add)
-  return dogdf.drop(['size_0','size_1','size_2','size_3','size_4'],axis=1)
-
-
-def massage_df_dogs(df):
-  newdf = deepcopy(df)
-  newdf["age_numeric_days"] = df.AgeuponOutcome.apply(age2day)
-  newdf["age_numeric"] = newdf.age_numeric_days / 365.
-  newdf['neuter_status'] = df.SexuponOutcome.apply(get_neuter_status)
-  newdf['sex'] = df.SexuponOutcome.apply(get_sex)
-  newdf['mixed'] = df.Breed.apply(isMixed)
-  newdf["time_stamp"] = df.DateTime.apply(lambda string_date:
-                                          datetime.strptime(string_date,"%Y-%m-%d %H:%M:%S") )
-  newdf['day_of_week'] = newdf['time_stamp'].apply(lambda x:x.dayofweek)
-  newdf['day_of_month'] = newdf['time_stamp'].apply(lambda x:x.day)
-  newdf['day_of_year'] = newdf['time_stamp'].apply(lambda x:x.dayofyear)
-  newdf['season'] = 0
-  newdf.loc[newdf['day_of_year'] >= 79., 'season'] = 1
-  newdf.loc[newdf['day_of_year'] >= 171., 'season'] = 2
-  newdf.loc[newdf['day_of_year'] >= 265., 'season'] = 3
-  newdf.loc[newdf['day_of_year'] >= 355., 'season'] = 0
-  newdf['month'] = newdf['time_stamp'].apply(lambda x:x.month)
   newdf = classify_breedsizes(newdf)
   return newdf
