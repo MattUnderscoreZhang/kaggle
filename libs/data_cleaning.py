@@ -179,6 +179,12 @@ def classify_breedsizes(dogdf):
       dogdf.loc[dogdf["Breed"].apply(lambda x: breed not in x),'is_small'] = False
   sizes = sizes.difference(add)
   # Groups that are medium.
+    add = set(['Border Collie','Pit Bull', 'Australian Cattle Dog', 'Australian Kelpie','Staffordshire','Schnauzer'])
+  for breed in add:
+      dogdf.loc[dogdf["Breed"].apply(lambda x: breed in x),'is_medium'] = True
+      dogdf.loc[dogdf["Breed"].apply(lambda x: breed not in x),'is_medium'] = False
+  sizes = sizes.difference(add)
+  #Groups that are large.
   add = set(['Australian Shepherd','Catahoula', 'Siberian Husky', 'Pointer'])
   for breed in add:
       dogdf.loc[dogdf["Breed"].apply(lambda x: breed in x),'is_large'] = True

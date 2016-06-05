@@ -5,14 +5,14 @@ import data_cleaning as dc
 def load_data(inputfn="data/train.csv",splitfrac=0.6):
   alldf = pd.read_csv(inputfn)
   alldf = dc.massage_df(alldf)
-  alldf = alldf[alldf['AnimalType']=='Cat']
+  #alldf = alldf[alldf['AnimalType']=='Cat']
 
   dc.fix_cat_breed(alldf)
 
   keep_features = [
       'age_numeric',
       'sex',
-      #'AnimalType',
+      'AnimalType',
       'catbreed',
       'day_of_week',
       'month',
@@ -34,8 +34,16 @@ def load_data(inputfn="data/train.csv",splitfrac=0.6):
       'has_Tan', 
       'has_Calico'
     ]
+  sizes = [
+    'is_toy',
+    'is_small',
+    'is_large',
+    'is_medium',
+    'is_xl',
+    'is_xxl'
+  ]
 
-  alldf_dummies = pd.get_dummies(alldf[keep_features + colors].dropna())
+  alldf_dummies = pd.get_dummies(alldf[keep_features + colors + sizes].dropna())
   return alldf, alldf_dummies
 
   # splits data.
