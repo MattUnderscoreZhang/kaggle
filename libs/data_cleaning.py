@@ -4,7 +4,6 @@ import pandas as pd
 from copy import deepcopy
 from datetime import datetime
 
-
 def percent_outcome(df,outcome_tag):
   """ series should have pandas.DataFrame interface
     return a pandas.Series of probabilities """
@@ -26,23 +25,52 @@ def age2day(age):
   return int(num)*num_days[unit]
 # end def age2day
 
+def age_type(age_in_days):
+    """ convert age numeric to age type """
+    young = 32    # < 1 month
+    old   = 5*365 # < 5 years
+    if age_in_days < young:
+        return "young"
+    elif age_in_days < old:
+        return "middle"
+    else:
+        return "old"
+    # end if
+# end def age_type
+
+def day_of_week_type(day_of_week):
+    """ convert day_of_week to weekday/weekends """
+    if day_of_week in [5,6]:
+        return "weekend"
+    else:
+        return "weekday"
+    # end if
+# end def
+
 def get_sex(x):
     if x=="Unknown" or pd.isnull(x):
         return "Unknown"
     else:
         return x.split(" ")[1]
+    # end if
+    # return "Male", "Female" or "Unknown"
+# end def
 
 def get_neuter_status(x):
     if x=="Unknown" or pd.isnull(x):
         return "Unknown"
     else:
         return x.split(" ")[0]
+    # end if
+# end def
 
 def isMixed(x):
     if ("mix" in x.lower()) or ("/" in x) or ("mix"):
         return "Mixed"
     else:
         return "Pure"
+    # end if
+# end def
 
 def sortcol(val,index):
   split = re.split(" |/",val)
@@ -178,23 +206,48 @@ def classify_breedsizes(dogdf):
   return dogdf.drop(['size_0','size_1','size_2','size_3','size_4'],axis=1)
 
 def massage_df(df):
+
   newdf = deepcopy(df)
-  newdf["age_numeric_days"] = df.AgeuponOutcome.apply(age2day)
-  newdf["age_numeric"] = newdf.age_numeric_days / 365.
-  newdf['neuter_status'] = df.SexuponOutcome.apply(get_neuter_status)
-  newdf['sex'] = df.SexuponOutcome.apply(get_sex)
-  newdf['mixed'] = df.Breed.apply(isMixed)
+
+  # animal features 
+  # ==== 
+
+  # common to cats and dogs
+  # ----
+  newdf["age_numeric_days"]  = df.AgeuponOutcome.apply(age2day)
+  newdf["age_numeric_years"] = newdf.age_numeric_days / 365.
+  newdf["age_numeric"]       = newdf.age_numeric_days / 365. # ! same as years, less descriptive, should be removed
+  newdf['neuter_status']     = df.SexuponOutcome.apply(get_neuter_status)
+  newdf['sex']               = df.SexuponOutcome.apply(get_sex)
+  newdf['mixed']             = df.Breed.apply(isMixed)
+
+  # features specific to cats
+  # ----
+  newdf = classify_colors(newdf)
+
+  # features specific to dogs
+  # ----
+  newdf = classify_breedsizes(newdf)
+
+  # outcome time related
+  # ==== 
   newdf["time_stamp"] = df.DateTime.apply(lambda string_date:
           datetime.strptime(string_date,"%Y-%m-%d %H:%M:%S") )
-  newdf['day_of_week'] = newdf['time_stamp'].apply(lambda x:x.dayofweek)
-  newdf['day_of_month'] = newdf['time_stamp'].apply(lambda x:x.day)
-  newdf['day_of_year'] = newdf['time_stamp'].apply(lambda x:x.dayofyear)
-  newdf['season'] = 0
-  newdf.loc[newdf['day_of_year'] >= 79., 'season'] = 1
-  newdf.loc[newdf['day_of_year'] >= 171.,'season'] = 2
-  newdf.loc[newdf['day_of_year'] >= 265.,'season'] = 3
-  newdf.loc[newdf['day_of_year'] >= 355.,'season'] = 0
   newdf['month'] = newdf['time_stamp'].apply(lambda x:x.month)
-  newdf = classify_colors(newdf)
-  newdf = classify_breedsizes(newdf)
+  newdf['day_of_month'] = newdf['time_stamp'].apply(lambda x:x.day)
+  newdf['day_of_year']  = newdf['time_stamp'].apply(lambda x:x.dayofyear)
+  newdf['day_of_week']  = newdf['time_stamp'].apply(lambda x:x.dayofweek)
+
+  # classify into weekdays and weekends
+  newdf['day_of_week_type'] = newdf.day_of_week.apply(day_of_week_type)
+
+  # classify day of year into seasons
+  newdf['season'] = "winter" # initialize all to winter, overwrite as needed
+  newdf.loc[newdf['day_of_year'] >= 79., 'season'] = "spring"
+  newdf.loc[newdf['day_of_year'] >= 171.,'season'] = "summer"
+  newdf.loc[newdf['day_of_year'] >= 265.,'season'] = "fall"
+  newdf.loc[newdf['day_of_year'] >= 355.,'season'] = "winter"
+
   return newdf
+
+# end def massage_df
