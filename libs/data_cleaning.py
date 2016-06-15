@@ -226,7 +226,9 @@ def massage_df(df):
   newdf["age_numeric_days"]  = df.AgeuponOutcome.apply(age2day)
   newdf["age_numeric_years"] = newdf.age_numeric_days / 365.
   newdf["age_numeric"]       = newdf.age_numeric_days / 365. # ! same as years, less descriptive, should be removed
-  newdf['neuter_status']     = df.SexuponOutcome.apply(get_neuter_status)
+  #newdf['neuter_status']     = df.SexuponOutcome.apply(get_neuter_status)
+  newdf["neuter_and_sex"]    = df.SexuponOutcome.apply(get_neuter_status)
+  newdf["neuter_status"]     = newdf["neuter_and_sex"].apply(just_neuter)
   newdf['sex']               = df.SexuponOutcome.apply(get_sex)
   newdf['mixed']             = df.Breed.apply(isMixed)
 
