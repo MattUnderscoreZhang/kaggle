@@ -47,6 +47,16 @@ def day_of_week_type(day_of_week):
     # end if
 # end def
 
+def is_weekend(dow_type):
+    if dow_type == "weekday":
+        return 0
+    elif dow_type == "weekend":
+        return 1
+    else:
+        print("wtf?!")
+    # end if
+# end def
+
 def get_sex(x):
     if x=="Unknown" or pd.isnull(x):
         return "Unknown"
@@ -251,6 +261,7 @@ def massage_df(df):
 
   # classify into weekdays and weekends
   newdf['day_of_week_type'] = newdf.day_of_week.apply(day_of_week_type)
+  newdf['is_weekend']       = newdf.day_of_week_type.apply(is_weekend)
 
   # classify day of year into seasons
   newdf['season'] = "winter" # initialize all to winter, overwrite as needed
