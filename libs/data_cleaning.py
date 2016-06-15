@@ -64,6 +64,15 @@ def get_neuter_status(x):
     # end if
 # end def
 
+def just_neuter(status):
+    """ decouple neuter status from sex """
+    if status in ["Neutered","Spayed"]:
+        return "neutered"
+    else:
+        return status
+    # end if
+# end def
+
 def isMixed(x):
     if ("mix" in x.lower()) or ("/" in x) or ("mix"):
         return "Mixed"
@@ -251,3 +260,16 @@ def massage_df(df):
   return newdf
 
 # end def massage_df
+
+def light_massage(df):
+
+    newdf = deepcopy(df)
+
+    newdf["age_in_days"] = df.AgeuponOutcome.apply(age2day)
+    newdf["neuter_and_sex"] = df.SexuponOutcome.apply(get_neuter_status)
+    newdf["neuter_status"]  = newdf["neuter_and_sex"].apply(just_neuter)
+    newdf["sex"] = df.SexuponOutcome.apply(get_sex)
+
+    return newdf
+# end def light_massage
+
