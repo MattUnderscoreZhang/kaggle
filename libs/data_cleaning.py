@@ -84,10 +84,10 @@ def just_neuter(status):
 # end def
 
 def isMixed(x):
-    if ("mix" in x.lower()) or ("/" in x) or ("mix"):
-        return "Mixed"
+    if ("mix" in x.lower()) or ("/" in x):
+        return "mixed"
     else:
-        return "Pure"
+        return "pure"
     # end if
 # end def
 
@@ -188,38 +188,38 @@ def classify_breedsizes(dogdf):
   # Groups that are toy.
   add = set(['Chihuahua'])
   for breed in add:
-      dogdf.loc[dogdf["Breed"].apply(lambda x: breed in x),'is_toy'] = True
-      dogdf.loc[dogdf["Breed"].apply(lambda x: breed not in x),'is_toy'] = False
+      dogdf.loc[dogdf["Breed"].apply(lambda x: breed in x),'is_toy'] = 1
+      dogdf.loc[dogdf["Breed"].apply(lambda x: breed not in x),'is_toy'] = 0
   sizes = sizes.difference(add)
   # Groups that are small.
   add = set(['Dachshund','Miniature Poodle','Rat Terrier','Jack Russell Terrier','Yorkshire Terrier','Miniature Schnauzer','Beagle',
           'Cairn Terrier','Shih Tzu'])
   for breed in add:
-      dogdf.loc[dogdf["Breed"].apply(lambda x: breed in x),'is_small'] = True
-      dogdf.loc[dogdf["Breed"].apply(lambda x: breed not in x),'is_small'] = False
+      dogdf.loc[dogdf["Breed"].apply(lambda x: breed in x),'is_small'] = 1
+      dogdf.loc[dogdf["Breed"].apply(lambda x: breed not in x),'is_small'] = 0
   sizes = sizes.difference(add)
   # Groups that are medium.
   add = set(['Border Collie','Pit Bull', 'Australian Cattle Dog', 'Australian Kelpie','Staffordshire','Schnauzer'])
   for breed in add:
-      dogdf.loc[dogdf["Breed"].apply(lambda x: breed in x),'is_medium'] = True
-      dogdf.loc[dogdf["Breed"].apply(lambda x: breed not in x),'is_medium'] = False
+      dogdf.loc[dogdf["Breed"].apply(lambda x: breed in x),'is_medium'] = 1
+      dogdf.loc[dogdf["Breed"].apply(lambda x: breed not in x),'is_medium'] = 0
   sizes = sizes.difference(add)
   #Groups that are large.
   add = set(['Australian Shepherd','Catahoula', 'Siberian Husky', 'Pointer'])
   for breed in add:
-      dogdf.loc[dogdf["Breed"].apply(lambda x: breed in x),'is_large'] = True
-      dogdf.loc[dogdf["Breed"].apply(lambda x: breed not in x),'is_large'] = False
+      dogdf.loc[dogdf["Breed"].apply(lambda x: breed in x),'is_large'] = 1
+      dogdf.loc[dogdf["Breed"].apply(lambda x: breed not in x),'is_large'] = 0
   sizes = sizes.difference(add)
   # Groups that are extra large.
   add = set(['Labrador Retriever', 'German Shepherd', 'American Staffordshire Terrier'])
   for breed in add:
-      dogdf.loc[dogdf["Breed"].apply(lambda x: breed in x),'is_xl'] = True
-      dogdf.loc[dogdf["Breed"].apply(lambda x: breed not in x),'is_xl'] = False
+      dogdf.loc[dogdf["Breed"].apply(lambda x: breed in x),'is_xl'] = 1
+      dogdf.loc[dogdf["Breed"].apply(lambda x: breed not in x),'is_xl'] = 0
   sizes = sizes.difference(add)
   # Groups that are extra extra large.
   add = set(['Rottweiler','American Bulldog', 'Great Pyrenees'])
   for breed in add:
-      dogdf.loc[dogdf["Breed"].apply(lambda x: breed in x),'is_xxl'] = True
+      dogdf.loc[dogdf["Breed"].apply(lambda x: breed in x),'is_xxl'] = 1
       dogdf.loc[dogdf["Breed"].apply(lambda x: breed not in x),'is_xxl'] = False
   sizes = sizes.difference(add)
   return dogdf.drop(['size_0','size_1','size_2','size_3','size_4'],axis=1)
@@ -241,6 +241,7 @@ def massage_df(df):
   newdf["neuter_status"]     = newdf["neuter_and_sex"].apply(just_neuter)
   newdf['sex']               = df.SexuponOutcome.apply(get_sex)
   newdf['mixed']             = df.Breed.apply(isMixed)
+  newdf['has_name']          = df.Name.isnull().apply(lambda x:not x)
 
   # features specific to cats
   # ----
@@ -278,10 +279,12 @@ def light_massage(df):
 
     newdf = deepcopy(df)
 
-    newdf["age_in_days"] = df.AgeuponOutcome.apply(age2day)
+    newdf["age_in_days"]    = df.AgeuponOutcome.apply(age2day)
     newdf["neuter_and_sex"] = df.SexuponOutcome.apply(get_neuter_status)
     newdf["neuter_status"]  = newdf["neuter_and_sex"].apply(just_neuter)
-    newdf["sex"] = df.SexuponOutcome.apply(get_sex)
+    newdf["sex"]            = df.SexuponOutcome.apply(get_sex)
+    newdf["mixed"]          = df.Breed.apply(isMixed)
+    newdf["has_name"]       = df.Name.isnull().apply(lambda x:not x)
 
     return newdf
 # end def light_massage
