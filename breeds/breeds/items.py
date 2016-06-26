@@ -11,4 +11,5 @@ class dog_item(scrapy.Item):
     # define the fields for your item here like:
     breed          = scrapy.Field()
     size           = scrapy.Field()
+    detail         = scrapy.Field()
 # end class dog_item
