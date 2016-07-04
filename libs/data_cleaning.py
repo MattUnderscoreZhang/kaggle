@@ -256,6 +256,36 @@ def dog_breed_info_name(name):
     # end if
 # end def
 
+def dog_breed_akc_name(name):
+    # relabel breed names to match those in the American Kennel Club database
+    if "English Bulldog" in name:
+        return "Bulldog"
+    elif name == "Anatol Shepherd":
+        return "Anatolian Shepherd"
+    elif name == "Standard Poodle":
+        return "Poodle"
+    elif "Yorkshire" in name:
+        return "Yorkshire Terrier"
+    elif "Pit Bull" in name:
+        return "American Pit Bull Terrier"
+    elif name == "Wire Hair Fox Terrier":
+        return "Wire Fox Terrier"
+    elif name == "Chihuahua Shorthair":
+        return "Chihuahua"
+    elif "Catahoula" in name:
+        return "Catahoula Leopard"
+    elif "Staffordshire" in name:
+        return "American Staffordshire Terrier"
+    elif "Russell" in name:
+        return "Russell Terrier"
+    elif "Terr" in name:
+        # replace full word, \b defines word boundary
+        return re.sub(r'\bTerr\b','',name)
+    else:
+        return name
+    # end if
+# end def
+
 
 def massage_df(df):
 
@@ -284,6 +314,8 @@ def massage_df(df):
   # ----
   breeds = df.Breed.apply(lambda x:x.replace("Mix",""))
   newdf["dog_breed"] = breeds.apply(breed_after_slash).apply(dog_breed_info_name)
+  newdf["akc_name"]  = breeds.apply(breed_after_slash).apply(dog_breed_akc_name)
+  newdf["akc_name"]  = newdf["akc_name"].apply(lambda x:x.replace("Dog","").strip())
   
   #newdf = classify_breedsizes(newdf)
 
