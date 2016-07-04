@@ -15,21 +15,26 @@ class size_spider(scrapy.Spider):
         # select <dl> <dt>Size</dt> ... </dl>
         size_tab = category_tab.xpath('dl[dt="Size"]')
 
-        # loop size catogory and pass page to data extraction function
+        # loop through size catogory and pass page to data extraction function
         for mysize in size_tab.xpath("dd"):
 
             url = mysize.xpath("a/@href").extract()[0]
             size_text = mysize.xpath("a/text()").extract()[0]
-            extra_info = {"size":size_text}
 
-            yield scrapy.Request(url, callback=lambda x:
-                self.extract_breed_info(x,extra_info)
-            )
+            yield scrapy.Request(url, callback=self.extract_breed_info)
         # end for url
 
     # end def parse
 
-    def extract_breed_info(self,response,extra_info=dict()):
+    def extract_breed_info(self,response):
+
+        sizes = ["small","medium","large","giant"]
+        size_text = ''
+        for mysize in sizes:
+            if mysize in response.url:
+                size_text = mysize
+            # end if
+        # end for mysize
 
         # each dog is in a <div class="list"> tab
         dogs = response.xpath('//div[@class="list"]')
@@ -44,11 +49,12 @@ class size_spider(scrapy.Spider):
 
         for dog in dogs:
             # start collecting data
+            continue
             entry = dog_item()
 
             breed = dog.xpath('.//div[@class="right-t"]/p/a/text()').extract()[0]
             entry["breed"] = breed
-            entry.update(extra_info)
+            entry["size"]  = size_text
 
             # hand data over to scrapy
             yield entry
@@ -62,9 +68,7 @@ class size_spider(scrapy.Spider):
             # get absolute url
             next_url = response.urljoin(next_url)
             # give myself a call
-            yield scrapy.Request(next_url, callback=lambda x:
-                self.extract_breed_info(x,extra_info)
-            )
+            yield scrapy.Request(next_url, callback=self.extract_breed_info)
         # end if
 
     # end def 
