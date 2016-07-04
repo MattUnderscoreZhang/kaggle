@@ -223,6 +223,39 @@ def classify_breedsizes(dogdf):
       dogdf.loc[dogdf["Breed"].apply(lambda x: breed not in x),'is_xxl'] = False
   sizes = sizes.difference(add)
   return dogdf.drop(['size_0','size_1','size_2','size_3','size_4'],axis=1)
+# end def classify_breedsizes
+
+def breed_after_slash(entry):
+    if "/" in entry:
+        return entry.split("/")[1]
+    else:
+        return entry.strip(" ")
+    # end if
+# end def
+
+def dog_breed_info_name(name):
+    if "Terr" in name:
+        # replace full word, \b defines word boundary
+        return re.sub(r'\bTerr\b','',name)
+    elif "English Bulldog" in name:
+        return "Bulldog"
+    elif name == "Anatol Shepherd":
+        return "Anatolian Shepherd Dog"
+    elif "Yorkshire" in name:
+        return "Yorkshire Terrier"
+    elif "Pit Bull" in name:
+        return "American Pit Bull Terrier"
+    elif name == "Wire Hair Fox Terrier":
+        return "Wire Fox Terrier"
+    elif name == "Chihuahua Shorthair":
+        return "Chihuahua"
+    elif name == "Dachshund":
+        return "Dachshund (Standard)"
+    else:
+        return name
+    # end if
+# end def
+
 
 def massage_df(df):
 
@@ -249,7 +282,10 @@ def massage_df(df):
 
   # features specific to dogs
   # ----
-  newdf = classify_breedsizes(newdf)
+  breeds = df.Breed.apply(lambda x:x.replace("Mix",""))
+  newdf["dog_breed"] = breeds.apply(breed_after_slash).apply(dog_breed_info_name)
+  
+  #newdf = classify_breedsizes(newdf)
 
   # outcome time related
   # ==== 
