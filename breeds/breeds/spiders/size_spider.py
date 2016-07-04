@@ -49,7 +49,6 @@ class size_spider(scrapy.Spider):
 
         for dog in dogs:
             # start collecting data
-            continue
             entry = dog_item()
 
             breed = dog.xpath('.//div[@class="right-t"]/p/a/text()').extract()[0]
