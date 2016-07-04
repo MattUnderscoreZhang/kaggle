@@ -30,6 +30,7 @@ class dog_detail_spider(scrapy.Spider):
 
             # read details page
             yield scrapy.Request(detail_url,self.read_dog_details)
+
         # end for dog
 
         # look for the "Next" button, follow if found
@@ -60,14 +61,16 @@ class dog_detail_spider(scrapy.Spider):
         # end for
 
         # basic fields
-        fields_of_interet = ["Popularity","Name","Size","Type"
+        fields_of_interet = ["Popularity","Name","Size"#,"Type"
                 ,"Life span","Temperament","Height","Weight"
                 ,"Puppy Price"]
         for field in fields_of_interet:
             field_text = "\""+field+"\""
             node = response.xpath('//td[contains(text(),%s)]'%field_text)
+            label = node.xpath('text()').extract()[0]
             value = " ".join( node.xpath("../td/text()").extract()[1:] )
-            entry[field] = value
+            #entry[field] = value
+            entry[label] = value
         # end for field
 
         dog_data["detail"] = entry
