@@ -12,4 +12,7 @@ class dog_item(scrapy.Item):
     breed          = scrapy.Field()
     size           = scrapy.Field()
     detail         = scrapy.Field()
+    group          = scrapy.Field()
+    rank           = scrapy.Field()
+    energy         = scrapy.Field()
 # end class dog_item
